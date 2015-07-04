@@ -23,7 +23,7 @@ protected:
 	int size;
 
 	//是否为大根堆
-	bool isMax;
+	//bool isMax;
 public:
 
 	MSHeap(int _capacity, MSModel* _model)
@@ -32,7 +32,7 @@ public:
 		size = 0;
 		data = new Node*[capacity];
 		model = _model;
-		isMax = false;
+		//isMax = false;
 	}
 
 	void swapData(int index1, int index2)
@@ -58,7 +58,7 @@ public:
 
 	void percolateUp(int index)
 	{
-		while (index != 0 && ((data[index]->value > data[getParent(index)]->value) == isMax))
+		while (index != 0 && (data[index]->value < data[getParent(index)]->value))
 		{
 			swapData(index, getParent(index));
 			index = getParent(index);
@@ -74,8 +74,8 @@ public:
 			int maxChild;
 			if (left >= size) return;
 			if (right >= size) maxChild = left;
-			else maxChild = ((data[left]->value > data[right]->value) == isMax) ? left : right;
-			if ((data[index]->value < data[maxChild]->value) == isMax)
+			else maxChild = ((data[left]->value < data[right]->value)) ? left : right;
+			if ((data[index]->value > data[maxChild]->value))
 			{
 				swapData(index, maxChild);
 				index = maxChild;

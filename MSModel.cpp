@@ -72,17 +72,10 @@ double MSModel::Edge::evaluate()
 	int limit = 10;
 	for (int i = 0; i < 2; i++)
 	{
-		foreach(MSModel::Edge* edge, vertices[i]->referedByEdges)
-		{
-			relatedTriangles.unite(edge->referedByTriangles);
-			//if (relatedTriangles.size() >= limit) break;
-		}
+		foreach(MSModel::Edge* edge, vertices[i]->referedByEdges) relatedTriangles.unite(edge->referedByTriangles);
 	}
 	foreach(Triangle* triangle, relatedTriangles)
 	{
-		/*MSVector3D onePoint = triangle->edges[0]->vertices[0]->position;
-		MSVector3D normal = MSVector3D(triangle->edges[0]->vertices[0]->position - triangle->edges[0]->vertices[1]->position).crossProduct
-			(triangle->edges[1]->vertices[0]->position - triangle->edges[1]->vertices[1]->position);*/
 		triangle->normal.vectorNormalize();
 		double term[4];
 		term[0] = triangle->normal.x(); term[1] = triangle->normal.y(); term[2] = triangle->normal.z();
@@ -93,38 +86,16 @@ double MSModel::Edge::evaluate()
 		}
 	}
 
-	if (!solveEquation(equation, bestPoint))
-	{
-		bestPoint = (vertices[0]->position + vertices[1]->position) / 2;
-	}
+	if (!solveEquation(equation, bestPoint)) bestPoint = (vertices[0]->position + vertices[1]->position) / 2;
 
 	double epsilon = 0.0;
 	foreach(Triangle* triangle, relatedTriangles)
 	{
-		/*MSVector3D onePoint = triangle->edges[0]->vertices[0]->position;
-		MSVector3D normal = MSVector3D(triangle->edges[0]->vertices[0]->position - triangle->edges[0]->vertices[1]->position).crossProduct
-			(triangle->edges[1]->vertices[0]->position - triangle->edges[1]->vertices[1]->position);*/
 		triangle->normal.vectorNormalize();
 		epsilon += qPow((bestPoint - triangle->onePoint).dotProduct(triangle->normal), 2);
 	}
 	double epsilonP = 0.0;
-	/*bestPoint = (vertices[0]->position + vertices[1]->position) / 2;
-	foreach(Triangle* triangle, relatedTriangles)
-	{
-		MSVector3D onePoint = triangle->edges[0]->vertices[0]->position;
-		MSVector3D normal = MSVector3D(triangle->edges[0]->vertices[0]->position - triangle->edges[0]->vertices[1]->position).crossProduct
-			(triangle->edges[1]->vertices[0]->position - triangle->edges[1]->vertices[1]->position);
-		normal.vectorNormalize();
-		epsilonP += (bestPoint - onePoint).dotProduct(normal)*(bestPoint - onePoint).dotProduct(normal);
-	}
-	if (epsilonP < epsilon)
-	{
-		int i = 0;
-		i++;
-	}*/
-
 	return epsilon;
-	//return (vertices[0]->position - vertices[1]->position).vectorLengthSquared();
 }
 
 MSModel::Triangle::~Triangle()
@@ -137,14 +108,8 @@ MSModel::Triangle::~Triangle()
 
 MSModel::Edge::~Edge()
 {
-	foreach(MSModel::Triangle* triangle, referedByTriangles)
-	{
-		delete triangle;
-	}
-	for (int i = 0; i < 2; i++)
-	{
-		vertices[i]->referedByEdges.remove(this);
-	}
+	foreach(MSModel::Triangle* triangle, referedByTriangles) delete triangle;
+	for (int i = 0; i < 2; i++) vertices[i]->referedByEdges.remove(this);
 }
 
 MSModel::Vertex::~Vertex()
@@ -224,10 +189,6 @@ void MSModel::vertexReplace(Vertex* oldVertex, Vertex* newVertex)
 	QSet<Edge*> toRemove;
 	foreach(Edge* edge, oldVertex->referedByEdges)
 	{
-		/*if (edge->referedByTriangles.size() == 0)
-		{
-			removeEdge(edge);
-		}*/
 		if (edge->vertices[0] == oldVertex) edge->vertices[0] = newVertex;
 		if (edge->vertices[1] == oldVertex) edge->vertices[1] = newVertex;
 		if (edge->vertices[0] == edge->vertices[1])
@@ -410,7 +371,7 @@ bool MSModel::saveModelToObjFile(const QString& filePath)
 	foreach(Vertex* vertex, vertices)
 	{
 		objOutputStream << "v " << vertex->position.x() << " " << vertex->position.y() << " " << vertex->position.z() << "\n";
-		consoleOutput << "\rWriting vertices..." << vertexOrder << "/" << vertices.size() << "...";
+		if (vertexOrder % 1000 == 0) consoleOutput << "\rWriting vertices..." << vertexOrder << "/" << vertices.size() << "...";
 		tempVertexPositions.insert(vertex, vertexOrder);
 		vertexOrder++;
 	}
@@ -428,7 +389,7 @@ bool MSModel::saveModelToObjFile(const QString& filePath)
 		}
 		else v[2] = triangle->edges[1]->vertices[0];
 		objOutputStream << "f " << tempVertexPositions[v[0]] << " " << tempVertexPositions[v[1]] << " " << tempVertexPositions[v[2]] << "\n";
-		consoleOutput << "\rWriting triangles..." << triangleOrder << "/" << triangles.size() << "...";
+		if (triangleOrder % 1000 == 0) consoleOutput << "\rWriting triangles..." << triangleOrder << "/" << triangles.size() << "...";
 		triangleOrder++;
 	}
 	consoleOutput << "\rWriting triangles..." << triangles.size() << "/" << triangles.size() << "...Done.\n";
