@@ -3,10 +3,21 @@
 
 int main(int argc, char *argv[])
 {
+	QTextStream consoleOutput(stdout);
+	if (argc <= 3)
+	{
+		consoleOutput << "Too few arguments!" << endl;
+		consoleOutput << "Usage: MeshSimplifier.exe <input> <output> <ratio>" << endl;
+		return 1;
+	}
 	MSModel model;
-	model.loadModelFromObjFile("D:\\Downloads\\models\\test_data\\fixed.perfect.dragon.100K.0.07.obj");
-	model.simplify(0.99);
-	model.saveModelToObjFile("D:\\dragon.obj");
+	if (!model.loadModelFromObjFile(QString(argv[1])))
+	{
+		consoleOutput << "Fail to open input file!" << endl;
+		return 1;
+	}
+	model.simplify(QString(argv[3]).toDouble());
+	model.saveModelToObjFile(QString(argv[2]));
 	system("pause");
 	return 0;
 }

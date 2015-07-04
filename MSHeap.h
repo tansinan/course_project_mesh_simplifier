@@ -3,7 +3,6 @@
 
 class MSHeap
 {
-	//表示一张试卷在堆中的存储。
 	struct Node
 	{
 		double value;

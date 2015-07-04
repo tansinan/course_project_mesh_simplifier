@@ -191,17 +191,8 @@ void MSModel::vertexReplace(Vertex* oldVertex, Vertex* newVertex)
 	{
 		if (edge->vertices[0] == oldVertex) edge->vertices[0] = newVertex;
 		if (edge->vertices[1] == oldVertex) edge->vertices[1] = newVertex;
-		if (edge->vertices[0] == edge->vertices[1])
-		{
-			toRemove.insert(edge);
-		}
-
+		if (edge->vertices[0] == edge->vertices[1]) toRemove.insert(edge);
 		newVertex->referedByEdges.insert(edge);
-		if (edge->heapIndex < 0)
-		{
-			bool t = edges.find(edge) == edges.end();
-			t = !(!t);
-		}
 	}
 	oldVertex->referedByEdges.clear();
 	delete oldVertex;
@@ -270,15 +261,17 @@ void MSModel::edgeCollapse(Edge* edge, const MSVector3D& newPosition)
 void MSModel::simplify(int count)
 {
 	QTextStream consoleOutput(stdout);
+	double epsilon = 0.0;
 	for (int i = 0; i < count; i++)
 	{
 		Edge* edge = heap->getExtreme()->edge;
-		edge->evaluate();
+		epsilon += edge->evaluate();
 		edgeCollapse(edge, edge->bestPoint);
-		if (i%100==0)
-		consoleOutput << "\r" << i << " " <<edges.size() << endl;
+		consoleOutput << "\r Simplifying...Remaining vertices:" << vertices.size() << "...           ";
 	}
-	consoleOutput << endl;
+	consoleOutput << "\r Simplifying...Remaining vertices:" << vertices.size() << "...Done\n";
+	consoleOutput << "\n";
+	consoleOutput << "Total error = " << epsilon << "\n";
 }
 
 void MSModel::simplify(double ratio)
