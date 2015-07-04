@@ -56,6 +56,13 @@ bool solveEquation(MSMatrix<3, 4>& equation, MSVector3D& result)
 	return true;
 }
 
+void MSModel::Triangle::updateGeometry()
+{
+	onePoint = edges[0]->vertices[0]->position;
+	normal = MSVector3D(edges[0]->vertices[0]->position - edges[0]->vertices[1]->position).crossProduct
+		(edges[1]->vertices[0]->position - edges[1]->vertices[1]->position);
+}
+
 double MSModel::Edge::evaluate()
 {
 	MSMatrix<3, 4> equation;
@@ -73,19 +80,16 @@ double MSModel::Edge::evaluate()
 	}
 	foreach(Triangle* triangle, relatedTriangles)
 	{
-		MSVector3D onePoint = triangle->edges[0]->vertices[0]->position;
+		/*MSVector3D onePoint = triangle->edges[0]->vertices[0]->position;
 		MSVector3D normal = MSVector3D(triangle->edges[0]->vertices[0]->position - triangle->edges[0]->vertices[1]->position).crossProduct
-			(triangle->edges[1]->vertices[0]->position - triangle->edges[1]->vertices[1]->position);
-		normal.vectorNormalize();
+			(triangle->edges[1]->vertices[0]->position - triangle->edges[1]->vertices[1]->position);*/
+		triangle->normal.vectorNormalize();
 		double term[4];
-		term[0] = normal.x(); term[1] = normal.y(); term[2] = normal.z();
-		term[3] = onePoint.dotProduct(normal);
+		term[0] = triangle->normal.x(); term[1] = triangle->normal.y(); term[2] = triangle->normal.z();
+		term[3] = triangle->onePoint.dotProduct(triangle->normal);
 		for (int i = 0; i < 3; i++)
 		{
-			for (int j = 0; j < 4; j++)
-			{
-				equation(i, j) += normal(i)*term[j];
-			}
+			for (int j = 0; j < 4; j++) equation(i, j) += triangle->normal(i)*term[j];
 		}
 	}
 
@@ -97,11 +101,11 @@ double MSModel::Edge::evaluate()
 	double epsilon = 0.0;
 	foreach(Triangle* triangle, relatedTriangles)
 	{
-		MSVector3D onePoint = triangle->edges[0]->vertices[0]->position;
+		/*MSVector3D onePoint = triangle->edges[0]->vertices[0]->position;
 		MSVector3D normal = MSVector3D(triangle->edges[0]->vertices[0]->position - triangle->edges[0]->vertices[1]->position).crossProduct
-			(triangle->edges[1]->vertices[0]->position - triangle->edges[1]->vertices[1]->position);
-		normal.vectorNormalize();
-		epsilon += (bestPoint - onePoint).dotProduct(normal)*(bestPoint - onePoint).dotProduct(normal);
+			(triangle->edges[1]->vertices[0]->position - triangle->edges[1]->vertices[1]->position);*/
+		triangle->normal.vectorNormalize();
+		epsilon += qPow((bestPoint - triangle->onePoint).dotProduct(triangle->normal), 2);
 	}
 	double epsilonP = 0.0;
 	/*bestPoint = (vertices[0]->position + vertices[1]->position) / 2;
@@ -241,10 +245,7 @@ void MSModel::vertexReplace(Vertex* oldVertex, Vertex* newVertex)
 	oldVertex->referedByEdges.clear();
 	delete oldVertex;
 	vertices.remove(oldVertex);
-	foreach(Edge* edge, toRemove)
-	{
-		removeEdge(edge, true);
-	}
+	foreach(Edge* edge, toRemove) removeEdge(edge, true);
 }
 
 void MSModel::edgeCollapse(Edge* edge, const MSVector3D& newPosition)
@@ -298,15 +299,11 @@ void MSModel::edgeCollapse(Edge* edge, const MSVector3D& newPosition)
 	{
 		affectedVertices.insert(edge->vertices[0]);
 		affectedVertices.insert(edge->vertices[1]);
+		affectedTriangles.unite(edge->referedByTriangles);
 	}
-	foreach(Vertex* vertex, affectedVertices)
-	{
-		affectedEdges.unite(vertex->referedByEdges);
-	}
-	foreach(Edge* edge, affectedEdges)
-	{
-		updateEdge(edge);
-	}
+	foreach(Vertex* vertex, affectedVertices) affectedEdges.unite(vertex->referedByEdges);
+	foreach(Edge* edge, affectedEdges) updateEdge(edge);
+	foreach(Triangle* triangle, affectedTriangles) triangle->updateGeometry();
 }
 
 void MSModel::simplify(int count)
@@ -391,11 +388,11 @@ bool MSModel::loadModelFromObjFile(const QString& filePath)
 	}
 	objModelFile.close();
 	consoleOutput << "\rLoading triangles..." << triangles.size() << " triangles loaded. Done.\n";
+
+	//构建用于加速的Heap
 	heap = new MSHeap(edges.size(), this);
-	foreach (Edge* edge, edges)
-	{
-		heap->insert(edge);
-	}
+	foreach(Triangle* triangle, triangles) triangle->updateGeometry();
+	foreach (Edge* edge, edges) heap->insert(edge);
 	return true;
 }
 

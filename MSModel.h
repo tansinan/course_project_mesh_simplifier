@@ -31,8 +31,11 @@ public:
 	};
 	struct Triangle
 	{
+		MSVector3D onePoint;
+		MSVector3D normal;
 		Edge* edges[3];
 		~Triangle();
+		void updateGeometry();
 	};
 public:
 	QSet<Vertex*> vertices;

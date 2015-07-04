@@ -30,9 +30,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MSSimplifier.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MSModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>

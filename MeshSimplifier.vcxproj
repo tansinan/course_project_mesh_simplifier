@@ -145,7 +145,6 @@
     <ClInclude Include="MSHeap.h" />
     <ClInclude Include="MSMatrix.h" />
     <ClInclude Include="MSModel.h" />
-    <ClInclude Include="MSSimplifier.h" />
     <ClInclude Include="MSVector2D.h" />
     <ClInclude Include="MSVector3D.h" />
   </ItemGroup>
