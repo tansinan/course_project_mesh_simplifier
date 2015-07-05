@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 		consoleOutput << "Fail to open input file!" << endl;
 		return 1;
 	}
-	model.simplify(QString(argv[3]).toDouble());
+	model.simplify(1 - QString(argv[3]).toDouble());
 	model.saveModelToObjFile(QString(argv[2]));
 	system("pause");
 	return 0;

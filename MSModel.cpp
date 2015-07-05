@@ -86,7 +86,27 @@ double MSModel::Edge::evaluate()
 		}
 	}
 
-	if (!solveEquation(equation, bestPoint)) bestPoint = (vertices[0]->position + vertices[1]->position) / 2;
+	if (!solveEquation(equation, bestPoint))
+	{
+		double bestFailEpsilon = 1e100;
+		MSVector3D failCandidates[3] = { vertices[0]->position, (vertices[0]->position + vertices[1]->position) / 2, vertices[1]->position };
+		bestPoint = failCandidates[1];
+		for (int i = 0; i < 3; i++)
+		{
+			double currentFailEpsilon = 0.0;
+			foreach(Triangle* triangle, relatedTriangles)
+			{
+				triangle->normal.vectorNormalize();
+				currentFailEpsilon += qPow((failCandidates[i] - triangle->onePoint).dotProduct(triangle->normal), 2);
+			}
+			if (currentFailEpsilon < bestFailEpsilon)
+			{
+				bestPoint = failCandidates[i];
+				bestFailEpsilon = currentFailEpsilon;
+			}
+		}
+		return bestFailEpsilon;
+	}
 
 	double epsilon = 0.0;
 	foreach(Triangle* triangle, relatedTriangles)
@@ -94,7 +114,6 @@ double MSModel::Edge::evaluate()
 		triangle->normal.vectorNormalize();
 		epsilon += qPow((bestPoint - triangle->onePoint).dotProduct(triangle->normal), 2);
 	}
-	double epsilonP = 0.0;
 	return epsilon;
 }
 

@@ -10,19 +10,13 @@ class MSHeap
 	};
 
 protected:
-	//指向节点的指针数组
 	Node** data;
 
 	MSModel* model;
-	
-	//容量
+
 	int capacity;
 
-	//当前大小
 	int size;
-
-	//是否为大根堆
-	//bool isMax;
 public:
 
 	MSHeap(int _capacity, MSModel* _model)
@@ -31,7 +25,6 @@ public:
 		size = 0;
 		data = new Node*[capacity];
 		model = _model;
-		//isMax = false;
 	}
 
 	void swapData(int index1, int index2)
@@ -83,7 +76,6 @@ public:
 		}
 	}
 
-	//插入算法插入结尾后上滤
 	bool insert(MSModel::Edge *edge)
 	{
 		if (size >= capacity) return false;
@@ -93,7 +85,6 @@ public:
 		node->value = edge->evaluate();
 		edge->heapIndex = size - 1;
 		data[size - 1] = node;
-		//setData(size - 1, paper);
 		percolateUp(size - 1);
 		return true;
 	}

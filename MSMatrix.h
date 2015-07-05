@@ -147,19 +147,6 @@ public:
 		}
 		return ret;
 	}
-	/*void printDebugInfo() const
-	{
-		cout << "[" << endl;
-		for (int i = 0; i<rows; i++)
-		{
-			for (int j = 0; j<columns; j++)
-			{
-				cout << (*this)(i, j) << ",";
-			}
-			cout << endl;
-		}
-		cout << "]" << endl;
-	}*/
 	template<int M>
 	MSMatrix<R, M> operator* (const MSMatrix<C, M>& other) const
 	{
