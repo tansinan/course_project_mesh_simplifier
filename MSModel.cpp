@@ -356,7 +356,7 @@ bool MSModel::loadModelFromObjFile(const QString& filePath)
 		}
 		else
 		{
-			qDebug() << "Ignoring Unsupported Line : " << command << param;
+			//qDebug() << "Ignoring Unsupported Line : " << command << param;
 		}
 	}
 	objModelFile.close();

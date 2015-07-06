@@ -15,4 +15,14 @@ CONFIG   -= app_bundle
 TEMPLATE = app
 
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    MSModel.cpp \
+    MSVector2D.cpp \
+    MSVector3D.cpp
+
+HEADERS += \
+    MSHeap.h \
+    MSMatrix.h \
+    MSModel.h \
+    MSVector2D.h \
+    MSVector3D.h
